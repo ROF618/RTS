@@ -69,20 +69,17 @@ def accepting_connections():
 
 #2nd thread functions - 1) See all the clients 2) Select a client 3) Send commands to the connected client
 #Interactive prompt for sending commands
-#TODO: add a quit conditional that exits program if quit or exit is typed
+
 def start_turtle():
     while True:
         cmd = input('turtle>')
-        if cmd == 'list':
+        if cmd == 'list:':
             list_connections()
         elif 'select' in cmd:
             conn = get_target(cmd)
             #error checking  below; checking that there is a existing connection from the user input
             if conn is not None:
                 send_target_commands(conn)
-        elif 'quit' in cmd:
-            print("quitting")
-            break
         else:
             print("command not recognized")
 
@@ -127,15 +124,11 @@ def send_target_commands(conn):
         try:
             cmd = input()
             if cmd == 'quit':
-                conn.close()
-                s.close()
-                sys.exit()
                 break
-            elif len(str.encode(cmd)) > 0:
+            elif len(str.encode(cmd) > 0):
                 conn.send(str.encode(cmd))
                 client_response = str(conn.recv(20480), "utf-8")
                 print(client_response, end="")
-                continue
         except:
             print("Error sending commands")
             break

