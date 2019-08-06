@@ -8,6 +8,7 @@ all_connections = []
 all_address = []
 
 
+
 #Create a socket (connecting two or more computers)
 def socket_creation():
     try:
@@ -34,6 +35,7 @@ def bind_socket():
         print("Binding the port to " + str(port))
 
         s.bind((host, port))
+
         s.listen(5)
 
     except socket.error as msg:
@@ -69,8 +71,9 @@ def accepting_connections():
 
 #2nd thread functions - 1) See all the clients 2) Select a client 3) Send commands to the connected client
 #Interactive prompt for sending commands
-#TODO: add a quit conditional that exits program if quit or exit is typed
+
 def start_turtle():
+    print("list of commands" + "\n" + "list - lists available connections" + "\n" + "select (num) - selects the connection")
     while True:
         cmd = input('turtle>')
         if cmd == 'list':
